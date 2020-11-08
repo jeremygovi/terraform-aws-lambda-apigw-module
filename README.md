@@ -4,16 +4,6 @@ Terraform module to deploy nodejs/python/go webapp to AWS Lambda fronted by API 
 
 ## How to use
 
-Best practices consists for example in :
-
-+ Configuring tfstate to be in a S3 bucket
-
-+ Versioning the code in a repository
-
-+ Creating github actions or trigger a jenkins job to run a CI/CD pipeline
-
-However, we will keep it simple, creating only a directory.
-
 
 ### Create and setup a new project direcory
 
@@ -81,5 +71,83 @@ terraform apply
 ```
 
 Then, go the generated URL displayed in the terraform output.
+
+## BONUS: CI/CD
+
+To automate all of this, you can do it with github actions:
+
+## Configure AWS Credentials
+
+Go to the github repo settings and create secrets for `AWS_ACCESS_KEY_ID`and `AWS_SECRET_ACCESS_KEY`
+
+## Let terraform use a non local tfstate file.
+
+Create a `backend.tf` file containing the following:
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket = "mybucket"
+    key    = "path/to/my/key"
+    region = "eu-west-3"
+  }
+}
+```
+
+## Configure github actions
+
+Create a `.github/workflows/terraform.yml` file in your github project, containing the following:
+
+```hcl
+name: 'Terraform'
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      AWS_DEFAULT_REGION: eu-west-3
+      AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+    
+    - name: Terraform fmt
+      uses: dflook/terraform-fmt-check@v1
+      with:
+        path: .
+    
+    - name: Terraform plan
+      uses: dflook/terraform-plan@v1
+      with:
+        path: .
+
+    # On push to master, build or change infrastructure according to Terraform configuration files
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      uses: dflook/terraform-apply@v1
+      with:
+        path: .
+```
+
+This pipeline will do a terraform fmt/plan for every push on master and pull requests. Apply will be done only on master changes.
+
+Of course, you can adapt it for your needs :-)
+
 
 
