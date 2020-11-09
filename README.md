@@ -12,7 +12,7 @@ mkdir -p helloworld-app
 cd helloworld-app
 ```
 
-### Create a `main.js` file (or any other name according to your needs)
+### Create a `main.js` file (or any other name/languages according to your needs, see [supported lambda runtimes](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html))
 
 Here is an example code you can put in the file:
 
