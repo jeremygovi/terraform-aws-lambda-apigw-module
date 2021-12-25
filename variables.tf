@@ -17,7 +17,7 @@ variable "lambda_runtime" {
 variable "environment_variables" {
   description = "Environment variables for lambda function"
   default     = {}
-  type        = "map"
+  type        = map
 }
 
 variable "api_gateway_name" {
