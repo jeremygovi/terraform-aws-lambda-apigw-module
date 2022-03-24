@@ -2,6 +2,12 @@
 
 Terraform module to deploy nodejs/python/go webapp to AWS Lambda fronted by API Gateway
 
+```diff
+- /!\ This module is not maintained anymore. This is a very simple module with basic features. 
+- For more complex needs, see: 
+```
+https://github.com/OpenClassrooms/terraform-aws-lambda-apigw-module
+
 ## How to use
 
 
